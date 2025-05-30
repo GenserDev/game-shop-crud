@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Store - Inventario</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-gamepad"></i>
+                <h1>Gaming Store</h1>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <i class="fas fa-boxes"></i>
+                    <span>Total Productos: <span id="total-products">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Stock Total: <span id="total-stock">0</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="openProductModal()">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Buscar productos..." onkeyup="searchProducts()">
+            </div>
+            <select id="filter-category" onchange="filterProducts()">
+                <option value="">Todas las categorías</option>
+            </select>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-container">
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Marca</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="products-tbody">
+                    <!-- Products will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Cargando productos...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <h3>No hay productos</h3>
+            <p>Agrega tu primer producto gaming</p>
+            <button class="btn btn-primary" onclick="openProductModal()">
+                <i class="fas fa-plus"></i>
+                Agregar Producto
+            </button>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Agregar Producto</h2>
+                <span class="close" onclick="closeProductModal()">&times;</span>
+            </div>
+            <form id="product-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nombre">Nombre del Producto *</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_categoria">Categoría *</label>
+                        <select id="id_categoria" name="id_categoria" required>
+                            <option value="">Seleccionar categoría</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_marca">Marca</label>
+                        <select id="id_marca" name="id_marca">
+                            <option value="">Seleccionar marca</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="precio">Precio *</label>
+                        <input type="number" id="precio" name="precio" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock">Stock *</label>
+                        <input type="number" id="stock" name="stock" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock_minimo">Stock Mínimo</label>
+                        <input type="number" id="stock_minimo" name="stock_minimo" min="0" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="codigo_barras">Código de Barras</label>
+                        <input type="text" id="codigo_barras" name="codigo_barras">
+                    </div>
+                    <div class="form-group">
+                        <label for="sku">SKU</label>
+                        <input type="text" id="sku" name="sku">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="activo" name="activo" checked>
+                            <span class="checkmark"></span>
+                            Producto Activo
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span id="submit-text">Guardar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Confirmar Eliminación</h2>
+                <span class="close" onclick="closeConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p class="text-warning">Esta acción marcará el producto como inactivo.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <script src="./js/main.js"></script>
+</body>
+</html>
